@@ -1,0 +1,5 @@
+INDEX VERSION 1.127+C:\Users\李智辉\Desktop\18436220合体版3月15号\.metadata\.plugins\org.eclipse.jdt.core
+402782763.index
+3705452257.index
+2456462236.index
+899518542.index

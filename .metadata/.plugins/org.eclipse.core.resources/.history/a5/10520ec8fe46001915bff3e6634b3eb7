@@ -1,0 +1,10 @@
+package com.yychatclient.controller;
+
+public class User {
+
+	public void setUserName(String userName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
