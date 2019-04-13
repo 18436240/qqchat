@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 import javax.swing.*;
 
@@ -83,9 +86,23 @@ public class ClientLogin extends JFrame implements ActionListener{//类名：Client
 			user.setUserName(userName);
 			user.setPassWord(passWord);
 			
-			Message mess=new ClientConnect().loginValidate(user);
-			if(mess.getMessageType().equals(Message.message_LoginSuccess)){
+			boolean loginSuccess=new ClientConnect().loginValidate(user);
+			if(loginSuccess){
 				new FriendList(userName);
+				
+				//第一步：向服务器发送获取在线用户信息的请求（Message）
+				Message mess=new Message();
+				mess.setSender(userName);
+				mess.setReceiver("Server");
+				mess.setMessageType(Message.message_RequestOnlineFriend);
+				Socket s=(Socket)ClientConnect.hsmSocket.get(userName);
+				ObjectOutputStream oos;
+				try{
+					oos=new ObjectOutputStream(s.getOutputStream());
+					oos.writeObject(mess);
+				}catch(IOException e1){
+					e1.printStackTrace();
+				}
 				this.dispose();
 			}else {
 				JOptionPane.showMessageDialog(this,"旺旺没想到");

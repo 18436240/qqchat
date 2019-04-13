@@ -1,4 +1,4 @@
-package com.yychatclient.view;
+/*package com.yychatclient.view;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -94,4 +94,4 @@ public class FriendChat extends JFrame implements ActionListener,Runnable{//¶¯×÷
 		}
 	} 
 
-}
+}*/
