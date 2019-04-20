@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 
 import javax.swing.*;
 
@@ -15,6 +16,7 @@ import com.yychat.model.User;
 import com.yychatclient.controller.ClientConnect;
 
 public class ClientLogin extends JFrame implements ActionListener{//类名：ClientLogin，模板，对象的模板
+	public static HashMap hmFriendlist=new HashMap<String,FriendList>();
 	//定义北部组件
 	JLabel jlbl1;//定义标签
 	
@@ -88,8 +90,9 @@ public class ClientLogin extends JFrame implements ActionListener{//类名：Client
 			
 			boolean loginSuccess=new ClientConnect().loginValidate(user);
 			if(loginSuccess){
-				new FriendList(userName);
-				
+				//new FriendList(userName);
+				FriendList friendList =new FriendList(userName);
+				hmFriendlist.put(userName, friendList);
 				//第一步：向服务器发送获取在线用户信息的请求（Message）
 				Message mess=new Message();
 				mess.setSender(userName);

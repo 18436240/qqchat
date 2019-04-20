@@ -22,7 +22,6 @@
 <fullyQualifiedTypeName name="com.yychatclient.controller.ClientConnect"/>
 <fullyQualifiedTypeName name="com.yychat.model.User"/>
 <fullyQualifiedTypeName name="javax.swing.JOptionPane"/>
-<fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="java.io.ObjectInputStream"/>
 <fullyQualifiedTypeName name="com.yychat.model.Message"/>
 <fullyQualifiedTypeName name="java.net.Socket"/>
@@ -30,4 +29,7 @@
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
 <fullyQualifiedTypeName name="javax.swing.text.html.HTMLDocument.Iterator"/>
+<fullyQualifiedTypeName name="com.yychatclient.view.ClientLogin"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="java.util.Iterator"/>
 </qualifiedTypeNameHistroy>
