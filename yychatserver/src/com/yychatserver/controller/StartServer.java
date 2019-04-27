@@ -6,6 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
 
 import com.yychat.model.Message;
 import com.yychat.model.User;
@@ -16,6 +19,8 @@ public class StartServer {
 	ServerSocket ss;
 	String userName;
 	String passWord;
+	Message mess;
+	ObjectOutputStream oos;
 	public StartServer(){
 		try {//捕获异常
 			ss= new ServerSocket(3456);
@@ -33,7 +38,7 @@ public class StartServer {
 				System.out.println(passWord);
 				
 				//实现密码验证功能
-				Message mess=new Message();
+				mess=new Message();
 				mess.setSender("Server");
 				mess.setReceiver(userName);
 				if(passWord.equals("123456")){//对象比较
@@ -42,12 +47,29 @@ public class StartServer {
 				}else {
 					mess.setMessageType(Message.message_LoginFailure);//"0"为验证不通过		
 				}
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
-				oos.writeObject(mess);
+				sendMessage(s,mess);
 				
 				//应该新建一个接收线程
 				if(passWord.equals("123456"))
 				{
+					//激活上线用户图标步骤一；在此处把自己登录成功的消息发送到在该用户之前登录的所以用户
+					mess.setMessageType(Message.message_NewOnlineFriend);
+					mess.setSender("Server");
+					mess.setContent(userName);//发送消息的内容，this指对象
+					
+				    //拿到已经登录在线的用户名字
+					Set onlineFriendSet=hsmSocket.keySet();
+					//Iterator it=onlineFriendSet.iterator();
+					//Iterator it=onlineFriendSet.iterator();
+					Iterator it=onlineFriendSet.iterator();
+					String friendName;
+					while(it.hasNext()){
+						friendName=(String)it.next();
+						mess.setReceiver(friendName);
+						//向friendname发送消息
+						Socket s1=(Socket)hsmSocket.get(friendName);
+						sendMessage(s1,mess);
+					}
 					hsmSocket.put(userName,s);
 				new ServerReceiverThread(s).start();//就绪
 				}
@@ -58,5 +80,9 @@ public class StartServer {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+	private void sendMessage(Socket s,Message mess) throws IOException {
+		ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
+		oos.writeObject(mess);
 	}
 }

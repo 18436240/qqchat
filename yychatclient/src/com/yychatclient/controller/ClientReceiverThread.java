@@ -38,7 +38,12 @@ public class ClientReceiverThread extends Thread{
 				FriendList friendList=(FriendList)ClientLogin.hmFriendlist.get(mess.getReceiver());
 				friendList.setEnableFriendIcon(mess.getContent());
 			}
-			
+			//激活新上线用户图标步骤2、接收消息、激活图标
+			if(mess.getMessageType().equals(Message.message_NewOnlineFriend)){
+				System.out.println("新用户上线了，用户名："+mess.getContent());
+				FriendList friendList=(FriendList)ClientLogin.hmFriendlist.get(mess.getReceiver());
+				friendList.setEnableFriendIcon(mess.getContent());
+			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}

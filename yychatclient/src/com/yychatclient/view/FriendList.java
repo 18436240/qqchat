@@ -156,7 +156,7 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{/
 	public void setEnableFriendIcon(String friendString){
 		String[] friendName=friendString.split(" ");
 		int count=friendName.length;
-		for(int i=1;i<count;i++){
+		for(int i=0;i<count;++i){
 			System.out.println("friendName["+i+"]:"+friendName[i]);
 		myFriendJLabel[Integer.parseInt(friendName[i])].setEnabled(true);
 		}
