@@ -64,13 +64,13 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{/
 			myFriendJLabel[i]=new JLabel(i+"",new ImageIcon("images/YY1.gif"),JLabel.LEFT);//"1"
 
 			myFriendJLabel[i].setEnabled(false);
-			if(Integer.parseInt(userName)==i)
-				myFriendJLabel[i].setEnabled(true);
+			//if(Integer.parseInt(userName)==i)
+			//myFriendJLabel[i].setEnabled(true);
 			
 			myFriendJLabel[i].addMouseListener(this);//Ìí¼ÓÊó±ê¼àÌýÆ÷
 			myFriendListJPanel.add(myFriendJLabel[i]);
 		}
-		myFriendJLabel[Integer.parseInt(userName)].setEnabled(true);
+		//[Integer.parseInt(userName)].setEnabled(true);
 		
 		myFriendJScrollPane =new JScrollPane(myFriendListJPanel);
 		myFriendPanel.add(myFriendJScrollPane);
@@ -156,12 +156,18 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{/
 	public void setEnableFriendIcon(String friendString){
 		String[] friendName=friendString.split(" ");
 		int count=friendName.length;
-		for(int i=0;i<count;++i){
+		for(int i=1;i<count;i++){
 			System.out.println("friendName["+i+"]:"+friendName[i]);
 		myFriendJLabel[Integer.parseInt(friendName[i])].setEnabled(true);
 		}
 	}
+	public void setEnableNewFriendIcon(String newOnlinefriendString){
+		myFriendJLabel[Integer.parseInt(newOnlinefriendString)].setEnabled(true);
+		}
+	
 
+
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource()==myStrangerJButton){

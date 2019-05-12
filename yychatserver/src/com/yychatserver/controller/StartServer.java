@@ -5,16 +5,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.management.relation.Relation;
 
 import com.yychat.model.Message;
 import com.yychat.model.User;
 
 public class StartServer {
-	public static HashMap hsmSocket=new HashMap<String,Socket>();
+	public static HashMap hmSocket=new HashMap<String,Socket>();
 	
 	ServerSocket ss;
 	String userName;
@@ -37,20 +43,58 @@ public class StartServer {
 				System.out.println(userName);
 				System.out.println(passWord);
 				
+				//使用数据库进行用户身份认证
+				//1、加载驱动程序
+				Class.forName("com.mysql.jdbc.Driver");
+				System.out.println("已经加载了数据库驱动！");
+				//2、连接数据库
+				String url="jdbc:mysql://127.0.0.1:3306/yychat";
+				//中文用户名必须用下面的url
+				//String url="jdbc:mysql://127.0.0.1:3306/yychat?useUnicode=true&characterEncoding=UTF-8";
+				String dbUser="root";
+				String dbPass="";				
+				Connection conn=DriverManager.getConnection(url,dbUser,dbPass);
+				
+				//3、创建PreparedStatement对象，用来执行SQL语句
+				String user_Login_Sql="select * from user where username=? and password=?";
+				PreparedStatement ptmt=conn.prepareStatement(user_Login_Sql);
+				ptmt.setString(1, userName);
+				ptmt.setString(2, passWord);
+				
+				//4、执行查询，返回结果集
+				ResultSet rs=ptmt.executeQuery();
+				
+				//5、根据结果集来判断是否能登录
+				boolean loginSuccess=rs.next();	
+				
 				//实现密码验证功能
 				mess=new Message();
 				mess.setSender("Server");
 				mess.setReceiver(userName);
-				if(passWord.equals("123456")){//对象比较
+				//if(passWord.equals("123456"))
+				if(loginSuccess)
+				{//对象比较
 					//告诉客户端密码验证通过的消息，可以创建Message类				
-					mess.setMessageType(Message.message_LoginSuccess);//"1"为验证通过				
+					mess.setMessageType(Message.message_LoginSuccess);//"1"为验证通过
+					
+					String friend_Relation_Sql="select slaveuser from relation where majoruser=? and relationtype='1'";
+					ptmt=conn.prepareStatement(user_Login_Sql);
+					ptmt.setString(1,userName);
+					ptmt.executeQuery();
+					String friendString="";
+					while(rs.next()){
+						friendString=friendString+rs.getString("slaveuser")+" ";
+					}
+					mess.setContent(friendString);
+					System.out.println(userName+"的数据表中的好友"+friendString);
 				}else {
 					mess.setMessageType(Message.message_LoginFailure);//"0"为验证不通过		
 				}
 				sendMessage(s,mess);
 				
 				//应该新建一个接收线程
-				if(passWord.equals("123456"))
+				//if(passWord.equals("123456"))
+				if(loginSuccess)
 				{
 					//激活上线用户图标步骤一；在此处把自己登录成功的消息发送到在该用户之前登录的所以用户
 					mess.setMessageType(Message.message_NewOnlineFriend);
@@ -58,8 +102,8 @@ public class StartServer {
 					mess.setContent(userName);//发送消息的内容，this指对象
 					
 				    //拿到已经登录在线的用户名字
-					Set onlineFriendSet=hsmSocket.keySet();
-					//Iterator it=onlineFriendSet.iterator();
+					Set onlineFriendSet=hmSocket.keySet();
+					//Iterator it=onlineFriendSegt.iterator();
 					//Iterator it=onlineFriendSet.iterator();
 					Iterator it=onlineFriendSet.iterator();
 					String friendName;
@@ -67,10 +111,10 @@ public class StartServer {
 						friendName=(String)it.next();
 						mess.setReceiver(friendName);
 						//向friendname发送消息
-						Socket s1=(Socket)hsmSocket.get(friendName);
+						Socket s1=(Socket)hmSocket.get(friendName);
 						sendMessage(s1,mess);
 					}
-					hsmSocket.put(userName,s);
+					hmSocket.put(userName,s);
 				new ServerReceiverThread(s).start();//就绪
 				}
 			}
@@ -78,6 +122,10 @@ public class StartServer {
 		} catch (IOException e) {
 			e.printStackTrace();//处理异常
 		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
