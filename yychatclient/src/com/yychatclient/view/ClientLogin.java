@@ -17,6 +17,7 @@ import com.yychatclient.controller.ClientConnect;
 
 public class ClientLogin extends JFrame implements ActionListener{//类名：ClientLogin，模板，对象的模板
 	public static HashMap hmFriendlist=new HashMap<String,FriendList>();
+	
 	//定义北部组件
 	JLabel jlbl1;//定义标签
 	
@@ -59,7 +60,11 @@ public class ClientLogin extends JFrame implements ActionListener{//类名：Client
 		//创建南部组件
 		jb1=new JButton(new ImageIcon("images/denglu.gif"));
 		jb1.addActionListener(this);
+		
+		//注册新用户步骤1、为注册按钮添加事件响应代码
 		jb2=new JButton(new ImageIcon("images/zhuce.gif"));
+		jb2.addActionListener(this);//给注册按钮添加动作监听器
+		
 		jb3=new JButton(new ImageIcon("images/quxiao.gif"));
 		jp1=new JPanel();
 		jp1.add(jb1);jp1.add(jb2);jp1.add(jb3);
@@ -80,35 +85,62 @@ public class ClientLogin extends JFrame implements ActionListener{//类名：Client
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource()==jb1) {
-			String userName = jtf1.getText().trim();
-			String passWord=new String(jpf1.getPassword());
+		//注册新用户,步骤2：响应动作代码
+		if(e.getSource()==jb2){
+			String userName = jtf1.getText().trim();//拿到用户名
+			String passWord=new String(jpf1.getPassword());//把密码转换成字符串
 			//创建User对像
 			User user=new User();//对象放在堆内存，引用变量放在栈内存
 			user.setUserName(userName);
 			user.setPassWord(passWord);
+			user.setUserMessageType("USER_REGISTER");//该user对象用来注册
+			boolean registerSuccess=new ClientConnect().registerUserIntoDB(user);
+			//注册新用户,步骤4：显示注册成功或失败的提示信息
+			if(registerSuccess){
+				JOptionPane.showMessageDialog(this,"注册成功！");
+			}else{
+				JOptionPane.showMessageDialog(this,"注册失败！可能有同名用户");
+			}
 			
-			boolean loginSuccess=new ClientConnect().loginValidate(user);
-			if(loginSuccess){
-				//new FriendList(userName);
-				FriendList friendList =new FriendList(userName);
+		}
+		
+		if(e.getSource()==jb1) {
+			String userName = jtf1.getText().trim();//拿到用户名
+			String passWord=new String(jpf1.getPassword());//把密码转换成字符串
+			//创建User对像
+			User user=new User();//对象放在堆内存，引用变量放在栈内存
+			user.setUserName(userName);
+			user.setPassWord(passWord);
+			user.setUserMessageType("USER_LOGIN");//该user对象用来登录
+			
+			//boolean loginSuccess=new ClientConnect().loginValidate(user);
+			Message mess=new ClientConnect().loginValidateFromDB(user);
+			//if(loginSuccess){
+			if(mess.getMessageType().equals(Message.message_LoginSuccess)){
+				//保存FriendList对象
+				String friendString=mess.getContent();
+				//FriendList friendList=new FriendList(userName); //构造方法需要拿到好友的名字
+				FriendList friendList=new FriendList(userName,friendString); //构造方法需要拿到好友的名字
 				hmFriendlist.put(userName, friendList);
-				//第一步：向服务器发送获取在线用户信息的请求（Message）
-				Message mess=new Message();
-				mess.setSender(userName);
-				mess.setReceiver("Server");
-				mess.setMessageType(Message.message_RequestOnlineFriend);
-				Socket s=(Socket)ClientConnect.hsmSocket.get(userName);
+				
+				
+				//第1步：向服务器发送获取在线用户信息的请求（Message）,类型：message_RequestOnlineFriend
+				Message mess1=new Message();
+				mess1.setSender(userName);
+				mess1.setReceiver("Server");
+				mess1.setMessageType(Message.message_RequestOnlineFriend);//请求获得服务器在线好友信息
+				Socket s=(Socket)ClientConnect.hmSocket.get(userName);
 				ObjectOutputStream oos;
-				try{
+				try {
 					oos=new ObjectOutputStream(s.getOutputStream());
-					oos.writeObject(mess);
-				}catch(IOException e1){
+					oos.writeObject(mess1);
+				} catch (IOException e1) {
 					e1.printStackTrace();
-				}
+				}				
+				
 				this.dispose();
 			}else {
-				JOptionPane.showMessageDialog(this,"旺旺没想到");
+				JOptionPane.showMessageDialog(this,"密码错误");
 			}			
 		}			
 		

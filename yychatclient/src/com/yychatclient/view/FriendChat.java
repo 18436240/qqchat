@@ -7,91 +7,101 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import com.yychat.model.Message;
 import com.yychatclient.controller.ClientConnect;
 
-public class FriendChat extends JFrame implements ActionListener,Runnable{//动作监听器
- 
-	//中间部分
-	JScrollPane jsp;//滚动条
-	JTextArea jta;//文本域
+public class FriendChat extends JFrame implements ActionListener,Runnable{//单继承
+
+	//Center部分
+	JScrollPane jsp;
+	JTextArea jta;
 	
-	
-	//南部部分
-	JPanel jp;//面板
-	JTextField jtf;//一行文本
+	//South部分
+	JPanel jp;
+	JTextField jtf;
 	JButton jb;
 	
 	String sender;
 	String receiver;
-	public FriendChat(String sender,String receiver){//自定义构造方法
+	
+	public FriendChat(String sender,String receiver){
 		this.sender=sender;
 		this.receiver=receiver;
-		jta = new JTextArea();//文本区域
-		jta.setEditable(false);//不允许在文本域进行编辑
-		jta.setForeground(Color.red);//显体颜色
-		jsp = new JScrollPane(jta);//滚动条只可以在构造方法里面定义组件
-		this.add(jsp);//加入窗口中
 		
-		jp = new JPanel();
-		jtf = new JTextField(15);//字符长度
-		jtf.setForeground(Color.red);;
-		jb = new JButton("发送");
+		jta = new JTextArea();//文本区域
+		jta.setEditable(false);
+		jta.setForeground(Color.red);
+		jsp = new JScrollPane(jta);
+		this.add(jsp,"Center");
+		
+		jp=new JPanel();
+		jtf=new JTextField(15);
+		jtf.setForeground(Color.red);
+		jb=new JButton("发送");
 		jb.addActionListener(this);
 		jp.add(jtf);
 		jp.add(jb);
 		this.add(jp,"South");
-		this.setSize(350, 240);
-		this.setTitle(sender+"正在和"+receiver+"聊天");
-		this.setLocationRelativeTo(null);//居中显示窗口
-		this.setVisible(true);
 		
-	}
-	public static void main(String[] args){
-		//FriendChat friendChat=new FriendChat("1","2");
+		this.setSize(350,240);
+		this.setTitle(sender+"正在和"+receiver+"聊天");
+		//this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setLocationRelativeTo(null);//居中显示窗口
+		this.setVisible(true);		
 	}
 	
+	public static void main(String[] args) {
+		FriendChat friendChat=new FriendChat("1","2");
+
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent arg0) {//事件处理代码
-	 if(arg0.getSource()==jb) {
-		 jta.append(jtf.getText()+"\r\n");
-		 
-		 //向服务器 发送聊天信息
-		 Message mess=new Message();
-		 mess.setSender(sender);
-		 mess.setReceiver(receiver);
-		 mess.setContent(jtf.getText());
-		 mess.setMessageType(Message.message_Common);
-		 ObjectOutputStream oos;
-		try {
-			oos = new ObjectOutputStream(ClientConnect.s.getOutputStream());
-			oos.writeObject(mess);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		 
-	 }
-		
+		if(arg0.getSource()==jb){
+			jta.append(jtf.getText()+"\r\n");
+			
+			//向服务器发送聊天信息
+			Message mess=new Message();
+			mess.setSender(sender);
+			mess.setReceiver(receiver);
+			mess.setContent(jtf.getText());
+			mess.setMessageType(Message.message_Common);
+			ObjectOutputStream oos;
+			try {
+				oos = new ObjectOutputStream(ClientConnect.s.getOutputStream());
+				oos.writeObject(mess);
+				
+				//能不能在这里接收其他人发送来的聊天信息？
+				ObjectInputStream ois = new ObjectInputStream(ClientConnect.s.getInputStream());
+				mess=(Message)ois.readObject();//接收聊天信息
+				String showMessage=mess.getSender()+"对"+mess.getReceiver()+"说："+mess.getContent();
+				System.out.println(showMessage);
+				jta.append(showMessage+"\r\n");
+				
+			} catch (IOException  e) {				
+				e.printStackTrace();
+			}			
+		}		
 	}
+
 	@Override
 	public void run() {
 		ObjectInputStream ois;
-		try {
-			ois=new ObjectInputStream(ClientConnect.s.getInputStream());
-			Message mess=(Message)ois.readObject();
-			String showMessage=mess.getSender()+"对"+mess.getReceiver()+"说："+mess.getContent();
-			System.out.println(showMessage);
-			jta.append(showMessage+"\r\n");
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+		while(true){
+			try {
+				ois = new ObjectInputStream(ClientConnect.s.getInputStream());
+				Message mess=(Message)ois.readObject();//接收聊天信息,线程阻塞
+				String showMessage=mess.getSender()+"对"+mess.getReceiver()+"说："+mess.getContent();
+				System.out.println(showMessage);
+				jta.append(showMessage+"\r\n");
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}	
 		}
-	} 
+			
+	}
 
-}*/
+}
+*/

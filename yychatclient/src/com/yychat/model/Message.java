@@ -2,7 +2,7 @@ package com.yychat.model;
 
 import java.io.Serializable;
 
-public class Message implements Serializable,MessageType{//类的单继承
+public class Message implements Serializable,MessageType{//类是单继承
 	private String sender;
 	private String receiver;
 	private String content;	
