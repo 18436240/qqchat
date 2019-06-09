@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
+import javax.swing.JOptionPane;
+
 import com.yychat.model.Message;
 import com.yychatclient.view.ClientLogin;
 import com.yychatclient.view.FriendChat1;
@@ -24,6 +26,21 @@ public class ClientReceiverThread extends Thread{
 			Message mess=(Message)ois.readObject();
 			String showMessage=mess.getSender()+"对"+mess.getReceiver()+"说；"+mess.getContent();
 			System.out.println(showMessage);
+			
+			
+			if(mess.getMessageType().equals(Message.message_AddFriendFailure_NoUser)) {
+				JOptionPane.showMessageDialog(null, "添加好友失！用户不存在！");
+			}
+			if(mess.getMessageType().equals(Message.message_AddFriendFailure_AlreadyFriend)) {
+				JOptionPane.showMessageDialog(null, "添加好友失！不能重复添加好友！");
+			}
+			if(mess.getMessageType().equals(Message.message_AddFriendSuccess)) {
+				JOptionPane.showMessageDialog(null, "添加好成功！");
+				String allFriendName=mess.getContent();
+				FriendList friendList=(FriendList)ClientLogin.hmFriendlist.get(mess.getSender());
+				friendList.updateFriendIcon(allFriendName);
+				friendList.revalidate();
+			}
 			
 			if(mess.getMessageType().equals(Message.message_Common)) {
 			

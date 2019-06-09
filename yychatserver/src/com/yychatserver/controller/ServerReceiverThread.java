@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.management.relation.RelationType;
+
 import com.yychat.model.Message;
 
 public class ServerReceiverThread extends Thread{
@@ -30,6 +32,35 @@ public class ServerReceiverThread extends Thread{
 			sender=mess.getSender();
 			System.out.println(mess.getSender()+"对"+mess.getReceiver()+"说："+mess.getContent());
 			
+			
+			if(mess.getMessageType().equals(Message.message_AddFriend)) {
+				String addFriendName=mess.getContent();
+				System.out.println("需要添加新好友的名字："+addFriendName);
+				
+				if(!YychatDbUtil.seekUser(addFriendName)) {
+					
+					mess.setMessageType(Message.message_AddFriendFailure_NoUser);
+				}else {
+					
+					
+					String relationType="1";
+					if(YychatDbUtil.seekRelation(sender,addFriendName,relationType)) {
+					
+					mess.setMessageType(Message.message_AddFriendFailure_AlreadyFriend);
+					}else {
+						
+						int count=YychatDbUtil.addRelation(sender,addFriendName,relationType);
+						if(count!=0) {
+							mess.setMessageType(Message.message_AddFriendSuccess);
+							
+							String allFriendName=YychatDbUtil.getFriendString(sender);
+							mess.setContent(allFriendName);
+						}
+					}
+				}
+				sendMessage(s, mess);
+			}
+			
 			if(mess.getMessageType().equals(Message.message_Common)) {
 			Socket s1=(Socket)StartServer.hmSocket.get(mess.getReceiver());
 			sendMessage(s1,mess);
@@ -45,7 +76,9 @@ public class ServerReceiverThread extends Thread{
 				while(it.hasNext()) {
 					friendName=(String)it.next();
 					if(!friendName.equals(mess.getSender()))
-						friendString=friendName+" "+friendString;
+						friendString=friendString+friendName+" "
+						
+						;
 				}
 				System.out.println("全部好友的名字；"+friendString);
 				

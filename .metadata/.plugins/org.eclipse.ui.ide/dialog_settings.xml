@@ -5,6 +5,8 @@
 		<item value="false" key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID"/>
 		<item value="false" key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED"/>
 		<list key="WizardProjectsImportPage.STORE_DIRECTORIES">
+			<item value="D:\18436240\yychatserver"/>
+			<item value="D:\18436240\yychatclient"/>
 			<item value="D:\18436240\yychatclient3"/>
 			<item value="D:\18436240\yychatserver3"/>
 			<item value="H:\视频\JAVA 视频\第二十一次课"/>

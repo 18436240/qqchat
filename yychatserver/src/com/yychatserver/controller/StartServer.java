@@ -118,7 +118,7 @@ public class StartServer {
 				new ServerReceiverThread(s).start();
 			}
 		 }
-		}	
+		 }	
 		
 			
 		} catch (IOException|ClassNotFoundException e) {

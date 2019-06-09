@@ -5,10 +5,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 
 import javax.swing.*;
+
+import com.yychat.model.Message;
+import com.yychatclient.controller.ClientConnect;
 
 public class FriendList extends JFrame implements ActionListener,MouseListener{
 	public static HashMap hmFriendChat1=new HashMap<String,FriendChat1>();
@@ -16,6 +21,9 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{
 	CardLayout cardLayout;
 	
 	JPanel myFriendPanel;
+	
+	JPanel addFriendPanel;
+	JButton addFriendJButton;
 	JButton myFriendJButton;
 	
 	JScrollPane myFriendJScrollPanel;
@@ -46,8 +54,15 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{
 		myFriendPanel=new JPanel(new BorderLayout());
 	
 		
+		
+		addFriendJButton=new JButton("添加好友：");
+		addFriendJButton.addActionListener(this);
+		
 		myFriendJButton=new JButton("我的好友");
-		myFriendPanel.add(myFriendJButton,"North");
+		addFriendPanel=new JPanel(new GridLayout(2,1));
+		addFriendPanel.add(addFriendJButton);
+		addFriendPanel.add(myFriendJButton);
+		myFriendPanel.add(addFriendPanel,"North");
 		
 		
 		/*JScrollPane myFriendJScrollPanel;
@@ -56,10 +71,13 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{
 		JLabel[] myFriendJLabel;*/
 		
 		
-		String[] friendName=friendString.split(" ");
-		int count=friendName.length;
 		
-		myFriendListJPanel=new JPanel(new GridLayout(count,1));
+		myFriendListJPanel=new JPanel();
+		updateFriendIcon(friendString);
+		//String[] friendName=friendString.split(" ");
+		//int count=friendName.length;
+		
+		/*myFriendListJPanel=new JPanel(new GridLayout(count,1));
 		for(int i=0;i<count;i++) {
 			myFriendJLabel[i]=new JLabel(friendName[i]+"",new ImageIcon("Images/YY1.gif"),JLabel.LEFT);
 			//myFriendJLabel[i].setEnabled(false);
@@ -68,22 +86,9 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{
 			
 			myFriendJLabel[i].addMouseListener(this);
 			myFriendListJPanel.add(myFriendJLabel[i]);
-		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		//myFriendJLabel[Integer.parseInt(userName)].setEnabled(true);
+		}//myFriendJLabel[Integer.parseInt(userName)].setEnabled(true);
 		//myFriendJScrollPanel=new JScrollPane();
-		//myFriendJScrollPanel.add(myFriendListJPanel);
+		//myFriendJScrollPanel.add(myFriendListJPanel);*/
 		myFriendJScrollPanel=new JScrollPane(myFriendListJPanel);
 		myFriendPanel.add(myFriendJScrollPanel);
 		
@@ -123,6 +128,23 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{
 		this.setVisible(true);
 	}
 		
+		public void updateFriendIcon(String friendString) {
+			myFriendListJPanel.removeAll();
+			String[] friendName=friendString.split(" ");
+			int count=friendName.length;
+			
+			myFriendListJPanel.setLayout(new GridLayout(count,1));
+			for(int i=0;i<count;i++) {
+				myFriendJLabel[i]=new JLabel(friendName[i]+"",new ImageIcon("images/YY1.gif"),JLabel.LEFT);
+				
+				
+				
+				
+				myFriendJLabel[i].addMouseListener(this);
+				myFriendListJPanel.add(myFriendJLabel[i]);
+			}
+		}
+		
 		public static void main(String[] args) {
 			//FriendList friendList=new FriendList();
 			
@@ -149,6 +171,27 @@ public class FriendList extends JFrame implements ActionListener,MouseListener{
 		
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+			
+			if(arg0.getSource()==addFriendJButton) {
+				String addFriendName=JOptionPane.showInputDialog(null,"请输入好友的名字: ","添加好友",JOptionPane.DEFAULT_OPTION);
+				Message mess=new Message();
+				mess.setSender(userName);
+				mess.setReceiver("Server");
+				mess.setContent(addFriendName);
+				mess.setMessageType(Message.message_AddFriend);
+				
+				Socket s=(Socket)ClientConnect.hmSocket.get(userName);
+				ObjectOutputStream oos;
+				try {
+					oos=new ObjectOutputStream(s.getOutputStream());
+					oos.writeObject(mess);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
+			
 			if(arg0.getSource()==myStrangerJButton) {
 				cardLayout.show(this.getContentPane(),"2");
 			}
